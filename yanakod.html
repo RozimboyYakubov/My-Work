@@ -1,0 +1,1129 @@
+<!DOCTYPE html>
+<html lang="uz">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mahsulotlar</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #1a1a2e;
+            color: #fff;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            width: 90%;
+            margin: auto;
+        }
+
+        .card {
+            background-color: #16213e;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            border-radius: 5px;
+            border: none;
+            background-color: #2c3e50;
+            color: #fff;
+        }
+
+        .btn {
+            padding: 10px 15px;
+            background-color: #4caf50;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+
+        .btn:hover {
+            background-color: #45a049;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        table th,
+        table td {
+            border: 1px solid #34495e;
+            padding: 12px;
+            text-align: left;
+        }
+
+        table th {
+            background-color: #0f3460;
+            color: #fff;
+        }
+
+        table tr:nth-child(even) {
+            background-color: #2c3e50;
+        }
+
+        table tr:hover {
+            background-color: #34495e;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .edit-btn,
+        .delete-btn,
+        .kassaga-btn {
+            padding: 5px 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .edit-btn {
+            background-color: #3498db;
+            color: white;
+        }
+
+        .delete-btn {
+            background-color: #e74c3c;
+            color: white;
+        }
+
+        .kassaga-btn {
+            background-color: #f39c12;
+            color: white;
+        }
+
+        .edit-btn:hover,
+        .delete-btn:hover,
+        .kassaga-btn:hover {
+            opacity: 0.8;
+            transform: translateY(-2px);
+        }
+
+        h3 {
+            color: #4caf50;
+            margin-top: 0;
+        }
+
+        .price-cell {
+            text-align: right;
+            font-family: monospace;
+        }
+
+        .total-cell {
+            font-weight: bold;
+            color: #f1c40f;
+        }
+
+        .add-table-btn {
+            padding: 12px 20px;
+            background-color: #9b59b6;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 20px;
+            transition: all 0.3s;
+        }
+
+        .add-table-btn:hover {
+            background-color: #8e44ad;
+        }
+
+        .table-container {
+            position: relative;
+            margin-bottom: 30px;
+        }
+
+        .remove-table-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 25px;
+            height: 25px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .active-table {
+            border: 2px solid #f39c12;
+            border-radius: 10px;
+            padding: 5px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="card">
+            <h3>Mahsulot qo'shish</h3>
+            <div class="form-group">
+                <label>Mahsulot nomi</label>
+                <input type="text" id="product-name" placeholder="Mahsulotni kiriting">
+            </div>
+            <div class="form-group">
+                <label>Mahsulot miqdori</label>
+                <input type="text" id="product-quantity" placeholder="Miqdorni kiriting (masalan: 5 10 2)">
+            </div>
+            <div class="form-group">
+                <label>Mahsulot narxi</label>
+                <input type="text" id="product-price" placeholder="Narxini kiriting (masalan: 1500 2000 10000)">
+            </div>
+            <button class="btn" id="add-product">Qo'shish</button>
+        </div>
+
+        <!-- Asosiy mahsulotlar jadvali -->
+        <div class="table-container active-table" id="main-table">
+            <div class="card">
+                <h3>Asosiy stol</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>T/r</th>
+                            <th>Nom</th>
+                            <th>Miqdor</th>
+                            <th>Narx</th>
+                            <th>Jami</th>
+                            <th>Amallar</th>
+                        </tr>
+                    </thead>
+                    <tbody id="product-list">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Yangi stollar qo'shiladigan joy -->
+        <div id="tables-container"></div>
+
+        <!-- Stol qo'shish tugmasi -->
+        <button class="add-table-btn" id="add-table">+ Stol qo'shish</button>
+    </div>
+    <!-- 
+    <script>
+        // Global o'zgaruvchilar
+        let tables = {
+            'main-table': {
+                products: [],
+                editIndex: -1
+            }
+        };
+
+        // Mahsulot qo'shish
+        document.getElementById('add-product').addEventListener('click', function () {
+            const nameInput = document.getElementById('product-name').value.trim();
+            const quantityInput = parseFloat(document.getElementById('product-quantity').value);
+            const priceInput = parseFloat(document.getElementById('product-price').value);
+            const activeTable = document.querySelector('.active-table');
+            const tableId = activeTable.id;
+
+            if (!nameInput || isNaN(quantityInput)) {
+                alert('Barcha maydonlarni to\'ldiring!');
+                return;
+            }
+
+            // Yangi mahsulot yaratamiz
+            const newProduct = {
+                id: Date.now(),
+                name: nameInput,
+                quantity: quantityInput,
+                unit: 'dona',
+                price: priceInput || 0,
+                total: quantityInput * (priceInput || 0)
+            };
+
+            tables[tableId].products.push(newProduct);
+            localStorage.setItem(tableId === 'main-table' ? 'mahsuotProducts' : tableId, JSON.stringify(tables[tableId].products));
+            displayProducts(tableId);
+
+            // Formani tozalash
+            document.getElementById('product-name').value = '';
+            document.getElementById('product-quantity').value = '';
+            document.getElementById('product-price').value = '';
+        });
+
+        // Mahsulotlarni ko'rsatish funksiyasi
+        function displayProducts(tableId) {
+            const tbody = document.querySelector(`#${tableId} tbody`);
+            tbody.innerHTML = '';
+
+            tables[tableId].products.forEach((product, index) => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td>${product.name}</td>
+                    <td>${product.quantity} ${product.unit}</td>
+                    <td>${product.price} so'm</td>
+                    <td>${product.total} so'm</td>
+                    <td>
+                        <div class="action-buttons">
+                            <button onclick="editProduct('${tableId}', ${index})" class="edit-btn">✏️</button>
+                            <button onclick="moveToKassa('${tableId}', ${index})" class="kassaga-btn">💰</button>
+                            <button onclick="deleteProduct('${tableId}', ${index})" class="delete-btn">🗑️</button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // Mahsulotni tahrirlash
+        function editProduct(tableId, index) {
+            const product = tables[tableId].products[index];
+            const newQuantity = prompt(`Yangi miqdorni kiriting (${product.unit}):`, product.quantity);
+
+            if (newQuantity && !isNaN(newQuantity)) {
+                product.quantity = parseFloat(newQuantity);
+                product.total = product.quantity * product.price;
+                localStorage.setItem(tableId, JSON.stringify(tables[tableId].products));
+                displayProducts(tableId);
+            }
+        }
+
+        // Mahsulotni o'chirish
+        function deleteProduct(tableId, index) {
+            if (confirm("Rostan ham bu mahsulotni o'chirmoqchimisiz?")) {
+                tables[tableId].products.splice(index, 1);
+                localStorage.setItem(tableId, JSON.stringify(tables[tableId].products));
+                displayProducts(tableId);
+            }
+        }
+
+        // Mahsulotni kassaga yuborish
+        function moveToKassa(tableId, index) {
+            const product = tables[tableId].products[index];
+
+            // chat.html'ga yuborish
+            const chatWindow = window.open('chat.html', '_blank');
+
+            // chatWindow yuklangandan so'ng mahsulotni yuborish
+            setTimeout(() => {
+                chatWindow.postMessage({
+                    type: 'addToKassa',
+                    product: product
+                }, '*');
+            }, 1000);
+
+            // Stoldan o'chirish (agar kerak bo'lsa)
+            // tables[tableId].products.splice(index, 1);
+            // localStorage.setItem(tableId, JSON.stringify(tables[tableId].products));
+            // displayProducts(tableId);
+        }
+
+        // Sahifa yuklanganda mahsulotlarni ko'rsatish
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedProducts = localStorage.getItem('mahsuotProducts');
+            if (savedProducts) {
+                tables['main-table'].products = JSON.parse(savedProducts);
+                displayProducts('main-table');
+            }
+        });
+    </script> -->
+
+    <!-- keraksiz kod.html fayliga quyidagi JavaScript kodini qo'shing -->
+
+    <!-- <script>
+        // Global o'zgaruvchilar
+        let tables = {
+            'main-table': {
+                products: [],
+                editIndex: -1
+            }
+        };
+
+        // Mahsulot qo'shish
+        document.getElementById('add-product').addEventListener('click', function () {
+            const nameInput = document.getElementById('product-name').value.trim();
+            const quantityInput = parseFloat(document.getElementById('product-quantity').value);
+            const priceInput = parseFloat(document.getElementById('product-price').value);
+            const activeTable = document.querySelector('.active-table');
+            const tableId = activeTable.id;
+
+            if (!nameInput || isNaN(quantityInput)) {
+                alert('Barcha maydonlarni to\'ldiring!');
+                return;
+            }
+
+            // Bazadan mahsulotni tekshiramiz
+            const baseProducts = JSON.parse(localStorage.getItem('inventory')) || [];
+            const baseProduct = baseProducts.find(p => p.name === nameInput);
+
+            if (!baseProduct) {
+                alert(`Bazada "${nameInput}" mahsuloti topilmadi!`);
+                return;
+            }
+
+            if (baseProduct.quantity < quantityInput) {
+                alert(`Bazada yetarli miqdor yo'q! Mavjud: ${baseProduct.quantity} ${baseProduct.unit}`);
+                return;
+            }
+
+            // Yangi mahsulot yaratamiz
+            const newProduct = {
+                id: Date.now(),
+                name: nameInput,
+                quantity: quantityInput,
+                unit: baseProduct.unit,
+                price: priceInput || baseProduct.price,
+                total: quantityInput * (priceInput || baseProduct.price)
+            };
+
+            tables[tableId].products.push(newProduct);
+            localStorage.setItem(tableId === 'main-table' ? 'mahsuotProducts' : tableId, JSON.stringify(tables[tableId].products));
+
+            // Bazadan miqdorni kamaytiramiz
+            const iframe = document.createElement('iframe');
+            iframe.style.display = 'none';
+            iframe.src = 'index.html';
+            document.body.appendChild(iframe);
+
+            iframe.onload = function () {
+                iframe.contentWindow.postMessage({
+                    type: 'decreaseQuantity',
+                    productName: nameInput,
+                    quantity: quantityInput,
+                    unit: baseProduct.unit
+                }, '*');
+            };
+
+            displayProducts(tableId);
+
+            // Formani tozalash
+            document.getElementById('product-name').value = '';
+            document.getElementById('product-quantity').value = '';
+            document.getElementById('product-price').value = '';
+        });
+
+        // Mahsulotlarni ko'rsatish funksiyasi
+        function displayProducts(tableId) {
+            const tbody = document.querySelector(`#${tableId} tbody`);
+            tbody.innerHTML = '';
+
+            tables[tableId].products.forEach((product, index) => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                <td>${index + 1}</td>
+                <td>${product.name}</td>
+                <td>${product.quantity} ${product.unit}</td>
+                <td>${product.price} so'm</td>
+                <td>${product.total} so'm</td>
+                <td>
+                    <div class="action-buttons">
+                        <button onclick="editProduct('${tableId}', ${index})" class="edit-btn">✏️</button>
+                        <button onclick="moveToKassa('${tableId}', ${index})" class="kassaga-btn">💰</button>
+                        <button onclick="deleteProduct('${tableId}', ${index})" class="delete-btn">🗑️</button>
+                    </div>
+                </td>
+            `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // Mahsulotni tahrirlash
+        function editProduct(tableId, index) {
+            const product = tables[tableId].products[index];
+            const newQuantity = parseFloat(prompt(`Yangi miqdorni kiriting (${product.unit}):`, product.quantity));
+
+            if (newQuantity && !isNaN(newQuantity)) {
+                const difference = newQuantity - product.quantity;
+
+                // Bazaga o'zgartirishlarni amalga oshiramiz
+                const iframe = document.createElement('iframe');
+                iframe.style.display = 'none';
+                iframe.src = 'index.html';
+                document.body.appendChild(iframe);
+
+                iframe.onload = function () {
+                    if (difference > 0) {
+                        // Agar yangi miqdor katta bo'lsa, bazadan kamaytiramiz
+                        iframe.contentWindow.postMessage({
+                            type: 'decreaseQuantity',
+                            productName: product.name,
+                            quantity: difference,
+                            unit: product.unit
+                        }, '*');
+                    } else if (difference < 0) {
+                        // Agar yangi miqdor kichik bo'lsa, bazaga qo'shamiz
+                        iframe.contentWindow.postMessage({
+                            type: 'increaseQuantity',
+                            productName: product.name,
+                            quantity: Math.abs(difference),
+                            unit: product.unit
+                        }, '*');
+                    }
+                };
+
+                product.quantity = newQuantity;
+                product.total = product.quantity * product.price;
+                localStorage.setItem(tableId, JSON.stringify(tables[tableId].products));
+                displayProducts(tableId);
+            }
+        }
+
+        // Mahsulotni o'chirish
+        function deleteProduct(tableId, index) {
+            if (confirm("Rostan ham bu mahsulotni o'chirmoqchimisiz?")) {
+                const product = tables[tableId].products[index];
+
+                // Bazaga mahsulot miqdorini qaytarib qo'shamiz
+                const iframe = document.createElement('iframe');
+                iframe.style.display = 'none';
+                iframe.src = 'index.html';
+                document.body.appendChild(iframe);
+
+                iframe.onload = function () {
+                    iframe.contentWindow.postMessage({
+                        type: 'increaseQuantity',
+                        productName: product.name,
+                        quantity: product.quantity,
+                        unit: product.unit
+                    }, '*');
+                };
+
+                tables[tableId].products.splice(index, 1);
+                localStorage.setItem(tableId, JSON.stringify(tables[tableId].products));
+                displayProducts(tableId);
+            }
+        }
+
+        // Mahsulotni kassaga yuborish
+        function moveToKassa(tableId, index) {
+            const product = tables[tableId].products[index];
+            const chatWindow = window.open('chat.html', '_blank');
+
+            setTimeout(() => {
+                chatWindow.postMessage({
+                    type: 'addToKassa',
+                    product: product
+                }, '*');
+            }, 1000);
+        }
+
+        // Sahifa yuklanganda mahsulotlarni ko'rsatish
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedProducts = localStorage.getItem('mahsuotProducts');
+            if (savedProducts) {
+                tables['main-table'].products = JSON.parse(savedProducts);
+                displayProducts('main-table');
+            }
+        });
+
+        // Xabarlarni qabul qilish
+        window.addEventListener('message', function (event) {
+            if (event.data.type === 'quantityUpdateResult') {
+                if (!event.data.success) {
+                    alert(event.data.message);
+                }
+            }
+        });
+    </script> -->
+
+    <!-- <script>
+        // Global o'zgaruvchilar
+        let tables = {
+            'main-table': {
+                products: [],
+                editIndex: -1
+            }
+        };
+
+        // Mahsulot qo'shish
+        document.getElementById('add-product').addEventListener('click', async function () {
+            const nameInput = document.getElementById('product-name').value.trim();
+            const quantityInput = parseFloat(document.getElementById('product-quantity').value);
+            const priceInput = parseFloat(document.getElementById('product-price').value);
+            const activeTable = document.querySelector('.active-table');
+            const tableId = activeTable.id;
+
+            if (!nameInput || isNaN(quantityInput) || quantityInput <= 0) {
+                alert('Barcha maydonlarni to\'ldiring va miqdor musbat son bo\'lishi kerak!');
+                return;
+            }
+
+            // Bazadan mahsulotni tekshiramiz
+            const baseProducts = JSON.parse(localStorage.getItem('inventory')) || [];
+            const baseProduct = baseProducts.find(p => p.name.toLowerCase() === nameInput.toLowerCase());
+
+            if (!baseProduct) {
+                alert(`Bazada "${nameInput}" mahsuloti topilmadi!`);
+                return;
+            }
+
+            if (baseProduct.quantity < quantityInput) {
+                alert(`Bazada yetarli miqdor yo'q! Mavjud: ${baseProduct.quantity} ${baseProduct.unit}`);
+                return;
+            }
+
+            // Bazadan miqdorni kamaytiramiz
+            const decreaseResponse = await sendMessageToBase({
+                type: 'decreaseQuantity',
+                productName: nameInput,
+                quantity: quantityInput,
+                unit: baseProduct.unit
+            });
+
+            if (!decreaseResponse.success) {
+                alert(decreaseResponse.message);
+                return;
+            }
+
+            // Yangi mahsulot yaratamiz
+            const newProduct = {
+                id: Date.now(),
+                name: nameInput,
+                quantity: quantityInput,
+                unit: baseProduct.unit,
+                price: priceInput || baseProduct.price,
+                total: quantityInput * (priceInput || baseProduct.price)
+            };
+
+            tables[tableId].products.push(newProduct);
+            localStorage.setItem(tableId === 'main-table' ? 'mahsuotProducts' : tableId, JSON.stringify(tables[tableId].products));
+            displayProducts(tableId);
+
+            // Formani tozalash
+            document.getElementById('product-name').value = '';
+            document.getElementById('product-quantity').value = '';
+            document.getElementById('product-price').value = '';
+        });
+
+        // Bazaga xabar yuborish funksiyasi
+        function sendMessageToBase(message) {
+            return new Promise((resolve) => {
+                const iframe = document.createElement('iframe');
+                iframe.style.display = 'none';
+                iframe.src = 'index.html';
+                document.body.appendChild(iframe);
+
+                const timeout = setTimeout(() => {
+                    resolve({ success: false, message: "Baza bilan bog'lanishda xatolik!" });
+                    document.body.removeChild(iframe);
+                }, 3000);
+
+                iframe.onload = function () {
+                    const channel = new MessageChannel();
+
+                    channel.port1.onmessage = function (event) {
+                        clearTimeout(timeout);
+                        resolve(event.data);
+                        document.body.removeChild(iframe);
+                        channel.port1.close();
+                    };
+
+                    iframe.contentWindow.postMessage(message, '*', [channel.port2]);
+                };
+            });
+        }
+
+        // Mahsulotlarni ko'rsatish funksiyasi
+        function displayProducts(tableId) {
+            const tbody = document.querySelector(`#${tableId} tbody`);
+            tbody.innerHTML = '';
+
+            tables[tableId].products.forEach((product, index) => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td>${product.name}</td>
+                    <td>${product.quantity} ${product.unit}</td>
+                    <td>${product.price} so'm</td>
+                    <td>${product.total} so'm</td>
+                    <td>
+                        <div class="action-buttons">
+                            <button onclick="editProduct('${tableId}', ${index})" class="edit-btn">✏️</button>
+                            <button onclick="moveToKassa('${tableId}', ${index})" class="kassaga-btn">💰</button>
+                            <button onclick="deleteProduct('${tableId}', ${index})" class="delete-btn">🗑️</button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // Mahsulotni tahrirlash
+        async function editProduct(tableId, index) {
+            const product = tables[tableId].products[index];
+            const newQuantity = parseFloat(prompt(`Yangi miqdorni kiriting (${product.unit}):`, product.quantity));
+
+            if (!newQuantity || isNaN(newQuantity) || newQuantity <= 0) {
+                alert('Noto\'g\'ri miqdor kiritildi!');
+                return;
+            }
+
+            const difference = newQuantity - product.quantity;
+
+            if (difference > 0) {
+                // Bazadan qo'shimcha miqdorni kamaytiramiz
+                const response = await sendMessageToBase({
+                    type: 'decreaseQuantity',
+                    productName: product.name,
+                    quantity: difference,
+                    unit: product.unit
+                });
+
+                if (!response.success) {
+                    alert(response.message);
+                    return;
+                }
+            } else if (difference < 0) {
+                // Bazaga ortiqcha miqdorni qaytaramiz
+                const response = await sendMessageToBase({
+                    type: 'increaseQuantity',
+                    productName: product.name,
+                    quantity: Math.abs(difference),
+                    unit: product.unit
+                });
+
+                if (!response.success) {
+                    alert(response.message);
+                    return;
+                }
+            }
+
+            product.quantity = newQuantity;
+            product.total = product.quantity * product.price;
+            localStorage.setItem(tableId, JSON.stringify(tables[tableId].products));
+            displayProducts(tableId);
+        }
+
+        // Mahsulotni o'chirish
+        async function deleteProduct(tableId, index) {
+            if (confirm("Rostan ham bu mahsulotni o'chirmoqchimisiz?")) {
+                const product = tables[tableId].products[index];
+
+                // Bazaga mahsulot miqdorini qaytarib qo'shamiz
+                const response = await sendMessageToBase({
+                    type: 'increaseQuantity',
+                    productName: product.name,
+                    quantity: product.quantity,
+                    unit: product.unit
+                });
+
+                if (!response.success) {
+                    alert(response.message);
+                    return;
+                }
+
+                tables[tableId].products.splice(index, 1);
+                localStorage.setItem(tableId, JSON.stringify(tables[tableId].products));
+                displayProducts(tableId);
+            }
+        }
+
+        // Mahsulotni kassaga yuborish
+        function moveToKassa(tableId, index) {
+            const product = tables[tableId].products[index];
+            const chatWindow = window.open('chat.html', '_blank');
+
+            setTimeout(() => {
+                chatWindow.postMessage({
+                    type: 'addToKassa',
+                    product: product
+                }, '*');
+            }, 1000);
+        }
+
+        // Sahifa yuklanganda mahsulotlarni ko'rsatish
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedProducts = localStorage.getItem('mahsuotProducts');
+            if (savedProducts) {
+                tables['main-table'].products = JSON.parse(savedProducts);
+                displayProducts('main-table');
+            }
+        });
+
+        // Xabarlarni qabul qilish
+        window.addEventListener('message', function (event) {
+            if (event.data.type === 'quantityUpdateResult') {
+                if (!event.data.success) {
+                    alert(event.data.message);
+                }
+            }
+        });
+    </script> -->
+
+    <!-- <script>
+        let tables = {
+            'main-table': {
+                products: [],
+                editIndex: -1
+            }
+        };
+
+        document.getElementById('add-product').addEventListener('click', async function () {
+            const nameInput = document.getElementById('product-name').value.trim();
+            const quantityInput = parseFloat(document.getElementById('product-quantity').value);
+            const priceInput = parseFloat(document.getElementById('product-price').value);
+            const tableId = 'main-table';
+
+            if (!nameInput || isNaN(quantityInput) || quantityInput <= 0) {
+                alert('Barcha maydonlarni to‘ldiring va miqdor ijobiy son bo‘lishi kerak!');
+                return;
+            }
+
+            const baseProducts = JSON.parse(localStorage.getItem('inventory')) || [];
+            const baseProduct = baseProducts.find(p => p.name.toLowerCase() === nameInput.toLowerCase());
+
+            if (!baseProduct) {
+                alert(`Bazada "${nameInput}" mahsuloti topilmadi!`);
+                return;
+            }
+
+            if (baseProduct.quantity < quantityInput) {
+                alert(`Bazada yetarli miqdor yo‘q! Mavjud: ${baseProduct.quantity} ${baseProduct.unit}`);
+                return;
+            }
+
+            const result = await sendMessageToBase({
+                type: 'decreaseQuantity',
+                productName: nameInput,
+                quantity: quantityInput,
+                unit: baseProduct.unit
+            });
+
+            if (!result.success) {
+                alert(result.message);
+                return;
+            }
+
+            const newProduct = {
+                id: Date.now(),
+                name: nameInput,
+                quantity: quantityInput,
+                unit: baseProduct.unit,
+                price: priceInput || baseProduct.price,
+                total: quantityInput * (priceInput || baseProduct.price)
+            };
+
+            tables[tableId].products.push(newProduct);
+            localStorage.setItem(tableId, JSON.stringify(tables[tableId].products));
+            displayProducts(tableId);
+
+            document.getElementById('product-name').value = '';
+            document.getElementById('product-quantity').value = '';
+            document.getElementById('product-price').value = '';
+        });
+
+        function sendMessageToBase(message) {
+            return new Promise((resolve) => {
+                const iframe = document.createElement('iframe');
+                iframe.style.display = 'none';
+                iframe.src = 'index.html';
+                document.body.appendChild(iframe);
+
+                const channel = new MessageChannel();
+                channel.port1.onmessage = function (event) {
+                    resolve(event.data);
+                    document.body.removeChild(iframe);
+                };
+
+                iframe.onload = function () {
+                    iframe.contentWindow.postMessage(message, '*', [channel.port2]);
+                };
+            });
+        }
+
+        function displayProducts(tableId) {
+            const tbody = document.querySelector(`#${tableId} tbody`);
+            tbody.innerHTML = '';
+            tables[tableId].products.forEach((product, index) => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                <td>${index + 1}</td>
+                <td>${product.name}</td>
+                <td>${product.quantity} ${product.unit}</td>
+                <td>${product.price} so'm</td>
+                <td>${product.total} so'm</td>
+                <td>
+                    <button onclick="deleteProduct('${tableId}', ${index})">🗑️</button>
+                </td>
+            `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        async function deleteProduct(tableId, index) {
+            const product = tables[tableId].products[index];
+            const result = await sendMessageToBase({
+                type: 'increaseQuantity',
+                productName: product.name,
+                quantity: product.quantity,
+                unit: product.unit
+            });
+            if (!result.success) {
+                alert(result.message);
+                return;
+            }
+            tables[tableId].products.splice(index, 1);
+            localStorage.setItem(tableId, JSON.stringify(tables[tableId].products));
+            displayProducts(tableId);
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const saved = localStorage.getItem('main-table');
+            if (saved) {
+                tables['main-table'].products = JSON.parse(saved);
+                displayProducts('main-table');
+            }
+        });
+    </script> -->
+
+
+    <!-- keraksiz kod.html fayliga quyidagi JavaScript kodini qo'shing -->
+    <script>
+        // Global o'zgaruvchilar
+        let tables = {
+            'main-table': {
+                products: [],
+                editIndex: -1
+            }
+        };
+
+        // Mahsulot qo'shish
+        document.getElementById('add-product').addEventListener('click', async function () {
+            const nameInput = document.getElementById('product-name').value.trim();
+            const quantityInput = parseFloat(document.getElementById('product-quantity').value);
+            const priceInput = parseFloat(document.getElementById('product-price').value);
+            const activeTable = document.querySelector('.active-table');
+            const tableId = activeTable.id;
+
+            if (!nameInput || isNaN(quantityInput) || quantityInput <= 0) {
+                alert('Barcha maydonlarni to\'ldiring va miqdor musbat son bo\'lishi kerak!');
+                return;
+            }
+
+            // Bazadan mahsulotni tekshiramiz
+            const baseProducts = JSON.parse(localStorage.getItem('inventory')) || [];
+            const baseProduct = baseProducts.find(p => p.name.toLowerCase() === nameInput.toLowerCase());
+
+            if (!baseProduct) {
+                alert(`Bazada "${nameInput}" mahsuloti topilmadi!`);
+                return;
+            }
+
+            if (baseProduct.quantity < quantityInput) {
+                alert(`Bazada yetarli miqdor yo'q! Mavjud: ${baseProduct.quantity} ${baseProduct.unit}`);
+                return;
+            }
+
+            // Bazadan miqdorni kamaytiramiz
+            const decreaseResponse = await sendMessageToBase({
+                type: 'decreaseQuantity',
+                productName: nameInput,
+                quantity: quantityInput,
+                unit: baseProduct.unit
+            });
+
+            if (!decreaseResponse.success) {
+                alert(decreaseResponse.message);
+                return;
+            }
+
+            // Yangi mahsulot yaratamiz
+            const newProduct = {
+                id: Date.now(),
+                name: nameInput,
+                quantity: quantityInput,
+                unit: baseProduct.unit,
+                price: priceInput || baseProduct.price,
+                total: quantityInput * (priceInput || baseProduct.price)
+            };
+
+            tables[tableId].products.push(newProduct);
+            localStorage.setItem(tableId === 'main-table' ? 'mahsuotProducts' : tableId, JSON.stringify(tables[tableId].products));
+            displayProducts(tableId);
+
+            // Formani tozalash
+            document.getElementById('product-name').value = '';
+            document.getElementById('product-quantity').value = '';
+            document.getElementById('product-price').value = '';
+        });
+
+        // Bazaga xabar yuborish funksiyasi
+        function sendMessageToBase(message) {
+            return new Promise((resolve) => {
+                const iframe = document.createElement('iframe');
+                iframe.style.display = 'none';
+                iframe.src = 'index.html';
+                document.body.appendChild(iframe);
+
+                const timeout = setTimeout(() => {
+                    resolve({ success: false, message: "Baza bilan bog'lanishda xatolik!" });
+                    document.body.removeChild(iframe);
+                }, 3000);
+
+                iframe.onload = function () {
+                    const channel = new MessageChannel();
+
+                    channel.port1.onmessage = function (event) {
+                        clearTimeout(timeout);
+                        resolve(event.data);
+                        document.body.removeChild(iframe);
+                        channel.port1.close();
+                    };
+
+                    iframe.contentWindow.postMessage(message, '*', [channel.port2]);
+                };
+            });
+        }
+
+        // Mahsulotlarni ko'rsatish funksiyasi
+        function displayProducts(tableId) {
+            const tbody = document.querySelector(`#${tableId} tbody`);
+            tbody.innerHTML = '';
+
+            tables[tableId].products.forEach((product, index) => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                <td>${index + 1}</td>
+                <td>${product.name}</td>
+                <td>${product.quantity} ${product.unit}</td>
+                <td>${product.price} so'm</td>
+                <td>${product.total} so'm</td>
+                <td>
+                    <div class="action-buttons">
+                        <button onclick="editProduct('${tableId}', ${index})" class="edit-btn">✏️</button>
+                        <button onclick="moveToKassa('${tableId}', ${index})" class="kassaga-btn">💰</button>
+                        <button onclick="deleteProduct('${tableId}', ${index})" class="delete-btn">🗑️</button>
+                    </div>
+                </td>
+            `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // Mahsulotni tahrirlash
+        async function editProduct(tableId, index) {
+            const product = tables[tableId].products[index];
+            const newQuantity = parseFloat(prompt(`Yangi miqdorni kiriting (${product.unit}):`, product.quantity));
+
+            if (!newQuantity || isNaN(newQuantity) || newQuantity <= 0) {
+                alert('Noto\'g\'ri miqdor kiritildi!');
+                return;
+            }
+
+            const difference = newQuantity - product.quantity;
+
+            if (difference > 0) {
+                // Bazadan qo'shimcha miqdorni kamaytiramiz
+                const response = await sendMessageToBase({
+                    type: 'decreaseQuantity',
+                    productName: product.name,
+                    quantity: difference,
+                    unit: product.unit
+                });
+
+                if (!response.success) {
+                    alert(response.message);
+                    return;
+                }
+            } else if (difference < 0) {
+                // Bazaga ortiqcha miqdorni qaytaramiz
+                const response = await sendMessageToBase({
+                    type: 'increaseQuantity',
+                    productName: product.name,
+                    quantity: Math.abs(difference),
+                    unit: product.unit
+                });
+
+                if (!response.success) {
+                    alert(response.message);
+                    return;
+                }
+            }
+
+            product.quantity = newQuantity;
+            product.total = product.quantity * product.price;
+            localStorage.setItem(tableId, JSON.stringify(tables[tableId].products));
+            displayProducts(tableId);
+        }
+
+        // Mahsulotni o'chirish
+        async function deleteProduct(tableId, index) {
+            if (confirm("Rostan ham bu mahsulotni o'chirmoqchimisiz?")) {
+                const product = tables[tableId].products[index];
+
+                // Bazaga mahsulot miqdorini qaytarib qo'shamiz
+                const response = await sendMessageToBase({
+                    type: 'increaseQuantity',
+                    productName: product.name,
+                    quantity: product.quantity,
+                    unit: product.unit
+                });
+
+                if (!response.success) {
+                    alert(response.message);
+                    return;
+                }
+
+                tables[tableId].products.splice(index, 1);
+                localStorage.setItem(tableId, JSON.stringify(tables[tableId].products));
+                displayProducts(tableId);
+            }
+        }
+
+        // Mahsulotni kassaga yuborish
+        function moveToKassa(tableId, index) {
+            const product = tables[tableId].products[index];
+            const chatWindow = window.open('chat.html', '_blank');
+
+            setTimeout(() => {
+                chatWindow.postMessage({
+                    type: 'addToKassa',
+                    product: product
+                }, '*');
+            }, 1000);
+        }
+
+        // Sahifa yuklanganda mahsulotlarni ko'rsatish
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedProducts = localStorage.getItem('mahsuotProducts');
+            if (savedProducts) {
+                tables['main-table'].products = JSON.parse(savedProducts);
+                displayProducts('main-table');
+            }
+        });
+
+        // Xabarlarni qabul qilish
+        window.addEventListener('message', function (event) {
+            if (event.data.type === 'quantityUpdateResult') {
+                if (!event.data.success) {
+                    alert(event.data.message);
+                }
+            }
+        });
+    </script>
+
+</body>
+
+</html>

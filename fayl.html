@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stol</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #1a1a2e;
+            color: white;
+            padding: 20px;
+        }
+        .card {
+            background-color: #16213e;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        table, tbody{
+            background-color: rgba(203, 221, 215, 0.913);
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #434242;
+        }
+        th {
+            background-color: #0f3460;
+        }
+        .action-btn {
+            border: none;
+            background: none;
+            font-size: 18px;
+            margin: 0 5px;
+            cursor: pointer;
+        }
+        .delete-btn { color: #000; } /* Qora rang */
+        .edit-btn { color: #000; } /* Qora rang */
+        .kassa-btn { color: #ffc107; } /* Sariq rang */
+        .form-input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+            border: none;
+            background-color: #2c3e50;
+            color: white;
+        }
+        .btn-primary {
+            background-color: #4caf50;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            color: white;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <h3>Mahsulot qo'shish</h3>
+            <input type="text" id="product-name" class="form-input" placeholder="Mahsulot nomi">
+            <input type="text" id="product-quantity" class="form-input" placeholder="Miqdor (masalan: 5.10.2)">
+            <input type="text" id="product-price" class="form-input" placeholder="Narx">
+            <button class="btn-primary" id="add-product">Qo'shish</button>
+        </div>
+
+        <div class="card">
+            <h3>Asosiy stol</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>T/r</th>
+                        <th>Nom</th>
+                        <th>Miqdor</th>
+                        <th>Narx</th>
+                        <th>Jami</th>
+                        <th>Amallar</th>
+                    </tr>
+                </thead>
+                <tbody id="table-body">
+                    <!-- Mahsulotlar shu yerda ko'rinadi -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // Stol mahsulotlari
+        let tableProducts = JSON.parse(localStorage.getItem('tableProducts')) || [];
+        
+        // Mahsulotlarni ko'rsatish
+        function displayProducts() {
+            const tbody = document.getElementById('table-body');
+            tbody.innerHTML = '';
+            
+            tableProducts.forEach((product, index) => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td>${product.name}</td>
+                    <td>${product.quantity} ${product.unit}</td>
+                    <td>${product.price} so'm</td>
+                    <td>${product.total} so'm</td>
+                    <td>
+                        <button onclick="editProduct(${index})" class="action-btn edit-btn">✏️</button>
+                        <button onclick="moveToKassa(${index})" class="action-btn kassa-btn">💰</button>
+                        <button onclick="deleteProduct(${index})" class="action-btn delete-btn">🗑️</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+        
+        // Mahsulot qo'shish
+        document.getElementById('add-product').addEventListener('click', function() {
+            const name = document.getElementById('product-name').value.trim();
+            const quantity = parseFloat(document.getElementById('product-quantity').value);
+            const price = parseFloat(document.getElementById('product-price').value);
+            
+            if (!name || isNaN(quantity) || isNaN(price)) {
+                alert("Iltimos, barcha maydonlarni to'g'ri to'ldiring!");
+                return;
+            }
+            
+            // Ombordan mahsulotni topish
+            let inventory = JSON.parse(localStorage.getItem('inventory')) || [];
+            const inventoryProduct = inventory.find(p => p.name === name);
+            
+            if (!inventoryProduct) {
+                alert("Bunday mahsulot omborda mavjud emas!");
+                return;
+            }
+            
+            if (inventoryProduct.quantity < quantity) {
+                alert(`Omborda faqat ${inventoryProduct.quantity} ${inventoryProduct.unit} ${name} mavjud!`);
+                return;
+            }
+            
+            // Yangi mahsulot yaratish
+            const newProduct = {
+                id: inventoryProduct.id,
+                name: name,
+                quantity: quantity,
+                unit: inventoryProduct.unit,
+                price: price,
+                total: quantity * price
+            };
+            
+            // Ombordagi miqdorni kamaytirish
+            inventoryProduct.quantity -= quantity;
+            localStorage.setItem('inventory', JSON.stringify(inventory));
+            
+            // Stolga qo'shish
+            tableProducts.push(newProduct);
+            localStorage.setItem('tableProducts', JSON.stringify(tableProducts));
+            displayProducts();
+            
+            // Formani tozalash
+            document.getElementById('product-name').value = '';
+            document.getElementById('product-quantity').value = '';
+            document.getElementById('product-price').value = '';
+        });
+        
+        // Kassaga yuborish
+        function moveToKassa(index) {
+            const product = tableProducts[index];
+            alert("Mahsulot kassaga yuborildi: " + product.name);
+            
+            // Stoldan o'chirish
+            tableProducts.splice(index, 1);
+            localStorage.setItem('tableProducts', JSON.stringify(tableProducts));
+            displayProducts();
+        }
+        
+        // Mahsulotni o'chirish
+        function deleteProduct(index) {
+            if (confirm("Rostan ham bu mahsulotni o'chirmoqchimisiz?")) {
+                const product = tableProducts[index];
+                
+                // Ombordagi mahsulotni qaytarish
+                let inventory = JSON.parse(localStorage.getItem('inventory')) || [];
+                const inventoryProduct = inventory.find(p => p.id === product.id);
+                
+                if (inventoryProduct) {
+                    inventoryProduct.quantity += product.quantity;
+                    localStorage.setItem('inventory', JSON.stringify(inventory));
+                }
+                
+                // Stoldan o'chirish
+                tableProducts.splice(index, 1);
+                localStorage.setItem('tableProducts', JSON.stringify(tableProducts));
+                displayProducts();
+            }
+        }
+        
+        // Mahsulotni tahrirlash
+        function editProduct(index) {
+            const product = tableProducts[index];
+            const newQuantity = prompt(`Yangi miqdorni kiriting (${product.unit}):`, product.quantity);
+            
+            if (newQuantity && !isNaN(newQuantity)) {
+                const diff = product.quantity - parseFloat(newQuantity);
+                product.quantity = parseFloat(newQuantity);
+                product.total = product.quantity * product.price;
+                
+                // Ombordagi miqdorni yangilash
+                let inventory = JSON.parse(localStorage.getItem('inventory')) || [];
+                const inventoryProduct = inventory.find(p => p.id === product.id);
+                
+                if (inventoryProduct) {
+                    inventoryProduct.quantity += diff;
+                    localStorage.setItem('inventory', JSON.stringify(inventory));
+                }
+                
+                localStorage.setItem('tableProducts', JSON.stringify(tableProducts));
+                displayProducts();
+            }
+        }
+        
+        // Sahifa yuklanganda mahsulotlarni ko'rsatish
+        displayProducts();
+    </script>
+</body>
+</html>

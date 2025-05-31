@@ -1,0 +1,191 @@
+<!-- <!DOCTYPE html>
+<html lang="uz">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mahsulot Qo'shish - Product</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #1a1a2e;
+            color: #fff;
+        }
+
+        .container {
+            width: 80%;
+            margin: 20px auto;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #0f3460;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+
+        .form-container {
+            background-color: #16213e;
+            padding: 30px;
+            border-radius: 8px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .form-container input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        .form-container button {
+            background-color: #4caf50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            width: 100%;
+            cursor: pointer;
+        }
+
+        .form-container button:hover {
+            background-color: #45a049;
+        }
+
+        .product-list {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #0f3460;
+            border-radius: 8px;
+        }
+
+        .product-list ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        .product-list li {
+            margin: 10px 0;
+            background-color: #16213e;
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        .back-button {
+            background-color: #e74c3c;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+
+        .back-button:hover {
+            background-color: #c0392b;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Mahsulot Qo'shish</h1>
+            <button class="back-button" onclick="window.location.href='index1.html'">Orqaga</button>
+        </div>
+
+        <div class="form-container">
+            <h3>Mahsulotni to'ldiring:</h3>
+            <form id="product-form">
+                <label for="product-name">Mahsulot nomi:</label>
+                <input type="text" id="product-name" required>
+
+                <label for="product-quantity">Mahsulot miqdori:</label>
+                <input type="text" id="product-quantity" required>
+
+                <label for="product-price">Mahsulot narxi (so'm):</label>
+                <input type="text" id="product-price" required>
+
+                <button type="submit">Mahsulotni qo'shish</button>
+            </form>
+        </div>
+
+        <div class="product-list">
+            <h3>Mahsulotlar ro'yxati:</h3>
+            <ul id="product-list">
+                <li>Hozircha mahsulot yo'q</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        const productList = [];
+
+        document.getElementById('product-form').addEventListener('submit', function (event) {
+            event.preventDefault();
+
+            const name = document.getElementById('product-name').value;
+            const quantity = document.getElementById('product-quantity').value;
+            const price = document.getElementById('product-price').value;
+
+            const product = {
+                name,
+                quantity,
+                price
+            };
+
+            productList.push(product);
+
+            updateProductList();
+            document.getElementById('product-form').reset();
+        });
+
+        function updateProductList() {
+            const list = document.getElementById('product-list');
+            list.innerHTML = '';
+
+            if (productList.length === 0) {
+                list.innerHTML = '<li>Hozircha mahsulot yoq</li > ';
+                return;
+            }
+
+            productList.forEach((product, index) => {
+                const listItem = document.createElement('li');
+                listItem.textContent = `${index + 1}. ${product.name} - ${product.quantity} dona - ${product.price} so'm`;
+                list.appendChild(listItem);
+            });
+        }
+    </script>
+
+    <!-- // Har bir fayl oxiriga qo'shish kerak -->
+    <!-- <script>
+        // Sahifa yangilanganda ma'lumotlarni yuklash
+        document.addEventListener('DOMContentLoaded', function () {
+            if (typeof loadData === 'function') {
+                loadData();
+            }
+        });
+
+        // Ma'lumotlarni saqlash funktsiyasi (har bir fayl uchun moslashtirilgan)
+        function saveData() {
+            // Har bir fayl uchun o'ziga xos saqlash logikasi
+            // Masalan, kassa.html uchun:
+            // localStorage.setItem('orders', JSON.stringify(orders));
+        }
+    </script> -->
+    
+</body>
+
+</html> -->

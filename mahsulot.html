@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mahsulotlar</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #1a1a2e;
+            color: #fff;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            width: 90%;
+            margin: auto;
+        }
+
+        .card {
+            background-color: #16213e;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            border-radius: 5px;
+            border: none;
+            background-color: #2c3e50;
+            color: #fff;
+        }
+
+        .btn {
+            padding: 10px 15px;
+            background-color: #4caf50;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+
+        .btn:hover {
+            background-color: #45a049;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        table th,
+        table td {
+            border: 1px solid #34495e;
+            padding: 12px;
+            text-align: left;
+        }
+
+        table th {
+            background-color: #0f3460;
+            color: #fff;
+        }
+
+        table tr:nth-child(even) {
+            background-color: #2c3e50;
+        }
+
+        table tr:hover {
+            background-color: #34495e;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .edit-btn,
+        .delete-btn,
+        .kassaga-btn {
+            padding: 5px 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .edit-btn {
+            background-color: #3498db;
+            color: white;
+        }
+
+        .delete-btn {
+            background-color: #e74c3c;
+            color: white;
+        }
+
+        .kassaga-btn {
+            background-color: #f39c12;
+            color: white;
+        }
+
+        .edit-btn:hover,
+        .delete-btn:hover,
+        .kassaga-btn:hover {
+            opacity: 0.8;
+            transform: translateY(-2px);
+        }
+
+        h3 {
+            color: #4caf50;
+            margin-top: 0;
+        }
+
+        .price-cell {
+            text-align: right;
+            font-family: monospace;
+        }
+
+        .total-cell {
+            font-weight: bold;
+            color: #f1c40f;
+        }
+
+        /* Stol qo'shish tugmasi uchun stil */
+        .add-table-btn {
+            padding: 12px 20px;
+            background-color: #9b59b6;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 20px;
+            transition: all 0.5s ease;
+        }
+
+        .add-table-btn:hover {
+            background-color: #15a897;
+            transform: translateY(12px);
+        }
+
+        .add-table-btn:active {
+            transform: translateX(-5px);
+            background-color: #7d3c98;
+        }
+
+        .table-container {
+            position: relative;
+            margin-bottom: 30px;
+        }
+
+        .remove-table-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 25px;
+            height: 25px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="card">
+            <h3>Mahsulot qo'shish</h3>
+            <div class="form-group">
+                <label>Mahsulot nomi</label>
+                <input type="text" id="product-name" placeholder="Mahsulotni kiriting">
+            </div>
+            <div class="form-group">
+                <label>Mahsulot miqdori</label>
+                <input type="text" id="product-quantity" placeholder="Miqdorni kiriting (masalan: 5 10 2)">
+            </div>
+            <div class="form-group">
+                <label>Mahsulot narxi</label>
+                <input type="text" id="product-price" placeholder="Narxini kiriting (masalan: 1500 2000 10000)">
+            </div>
+            <button class="btn" id="add-product">Qo'shish</button>
+        </div>
+
+        <!-- Asosiy mahsulotlar jadvali -->
+        <div class="table-container" id="main-table">
+            <div class="card">
+                <h3>Asosiy stol</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>T/r</th>
+                            <th>Nom</th>
+                            <th>Miqdor</th>
+                            <th>Narx</th>
+                            <th>Jami</th>
+                            <th>Amallar</th>
+                        </tr>
+                    </thead>
+                    <tbody id="product-list">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Yangi stollar qo'shiladigan joy -->
+        <div id="tables-container"></div>
+
+        <!-- Stol qo'shish tugmasi -->
+        <button class="add-table-btn" id="add-table">+ Stol qo'shish</button>
+    </div>
+
+    <script>
+        // Global o'zgaruvchilar
+        let tables = {
+            'main-table': {
+                products: JSON.parse(localStorage.getItem('mahsuotProducts')) || [],
+                editIndex: -1
+            }
+        };
+
+        // Raqamlarni formatlash
+        function formatNumber(num) {
+            if (num < 1000) num = num * 1000;
+            return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+        }
+
+        // Jami summani hisoblash
+        function calculateTotal(quantities, prices) {
+            let total = 0;
+            for (let i = 0; i < Math.max(quantities.length, prices.length); i++) {
+                const q = parseFloat(quantities[i] || quantities[0] || 0);
+                const p = parseFloat(prices[i] || prices[0] || 0);
+                total += q * p;
+            }
+            return total;
+        }
+
+        // Mahsulotlarni ko'rsatish
+        function displayProducts(tableId) {
+            const tableBody = document.querySelector(`#${tableId} tbody`);
+            tableBody.innerHTML = '';
+
+            tables[tableId].products.forEach((product, index) => {
+                const row = `<tr>
+                    <td>${index + 1}</td>
+                    <td>${product.name}</td>
+                    <td>${product.quantity}</td>
+                    <td class="price-cell">${product.priceFormatted}</td>
+                    <td class="price-cell total-cell">${formatNumber(product.total)} So'm</td>
+                    <td>
+                        <div class="action-buttons">
+                            <button class="edit-btn" onclick="editProduct('${tableId}', ${index})">✏️ Tahrirlash</button>
+                            <button class="delete-btn" onclick="deleteProduct('${tableId}', ${index})">🗑️ O'chirish</button>
+                            <button class="kassaga-btn" onclick="moveToKassa('${tableId}', ${index})">💰 Kassaga</button>
+                        </div>
+                    </td>
+                </tr>`;
+                tableBody.innerHTML += row;
+            });
+        }
+
+        // Mahsulot qo'shish
+        document.getElementById('add-product').addEventListener('click', function () {
+            const nameInput = document.getElementById('product-name').value.trim();
+            const quantityInput = document.getElementById('product-quantity').value.trim();
+            const priceInput = document.getElementById('product-price').value.trim();
+            const activeTable = document.querySelector('.active-table') || document.getElementById('main-table');
+            const tableId = activeTable.id;
+
+            if (!nameInput || !quantityInput || !priceInput) {
+                alert('Barcha maydonlarni to‘ldiring!');
+                return;
+            }
+
+            const quantities = quantityInput.split(/\s+/);
+            const prices = priceInput.split(/\s+/);
+            const pricesFormatted = prices.map(p => formatNumber(parseFloat(p)) || p);
+            const total = calculateTotal(quantities, prices);
+
+            const newProduct = {
+                name: nameInput,
+                quantity: quantities.join(' '),
+                price: prices.join(' '),
+                priceFormatted: pricesFormatted.join(' '),
+                total: total
+            };
+
+            if (tables[tableId].editIndex === -1) {
+                tables[tableId].products.push(newProduct);
+            } else {
+                tables[tableId].products[tables[tableId].editIndex] = newProduct;
+                tables[tableId].editIndex = -1;
+                document.getElementById('add-product').textContent = 'Qo\'shish';
+            }
+
+            localStorage.setItem(tableId === 'main-table' ? 'mahsuotProducts' : tableId, JSON.stringify(tables[tableId].products));
+            displayProducts(tableId);
+
+            // Formani tozalash
+            document.getElementById('product-name').value = '';
+            document.getElementById('product-quantity').value = '';
+            document.getElementById('product-price').value = '';
+        });
+
+        // Mahsulotni tahrirlash
+        function editProduct(tableId, index) {
+            const product = tables[tableId].products[index];
+            document.getElementById('product-name').value = product.name;
+            document.getElementById('product-quantity').value = product.quantity;
+            document.getElementById('product-price').value = product.price;
+
+            tables[tableId].editIndex = index;
+            document.getElementById('add-product').textContent = 'Saqlash';
+            document.getElementById('product-name').focus();
+        }
+
+        // Mahsulotni o'chirish
+        function deleteProduct(tableId, index) {
+            if (confirm('Rostan ham o\'chirmoqchimisiz?')) {
+                tables[tableId].products.splice(index, 1);
+                localStorage.setItem(tableId === 'main-table' ? 'mahsuotProducts' : tableId, JSON.stringify(tables[tableId].products));
+                displayProducts(tableId);
+            }
+        }
+
+        // Kassaga yuborish
+        function moveToKassa(tableId, index) {
+            const product = tables[tableId].products[index];
+            let kassaItems = JSON.parse(localStorage.getItem('kassaItems')) || [];
+            kassaItems.push(product);
+            localStorage.setItem('kassaItems', JSON.stringify(kassaItems));
+
+            tables[tableId].products.splice(index, 1);
+            localStorage.setItem(tableId === 'main-table' ? 'mahsuotProducts' : tableId, JSON.stringify(tables[tableId].products));
+            displayProducts(tableId);
+
+            alert(`${product.name} kassaga o'tkazildi!`);
+        }
+
+        // Yangi stol qo'shish
+        document.getElementById('add-table').addEventListener('click', function () {
+            const tableId = 'table-' + Date.now();
+            tables[tableId] = {
+                products: [],
+                editIndex: -1
+            };
+
+            const newTableHTML = `
+            <div class="table-container" id="${tableId}">
+                <button class="remove-table-btn" onclick="removeTable('${tableId}')">×</button>
+                <div class="card">
+                    <h3>Yangi stol</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>T/r</th>
+                                <th>Nom</th>
+                                <th>Miqdor</th>
+                                <th>Narx</th>
+                                <th>Jami</th>
+                                <th>Amallar</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>`;
+
+            document.getElementById('tables-container').insertAdjacentHTML('beforeend', newTableHTML);
+        });
+
+        // Stolni o'chirish
+        function removeTable(tableId) {
+            if (confirm('Bu stolni o\'chirmoqchimisiz?')) {
+                document.getElementById(tableId).remove();
+                delete tables[tableId];
+                localStorage.removeItem(tableId);
+            }
+        }
+
+        // Sahifa yuklanganda
+        displayProducts('main-table');
+    </script>
+</body>
+
+</html>

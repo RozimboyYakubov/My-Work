@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="uz">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kassa</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            display: flex;
+            height: 100vh;
+            background-color: #ffffff;
+        }
+
+        .left-panel {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background-color: #f8f9fa;
+        }
+
+        .right-panel {
+            width: 350px;
+            border-left: 1px solid #ddd;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            background-color: #fff;
+        }
+
+        .right-panel h1 {
+            font-size: 24px;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .checkout-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px dashed #ddd;
+        }
+
+        .checkout-total {
+            font-weight: bold;
+            font-size: 18px;
+            margin: 20px 0;
+            padding-top: 10px;
+            border-top: 1px solid #ddd;
+        }
+
+        .btn {
+            padding: 12px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 10px;
+            transition: background-color 0.3s;
+        }
+
+        .btn:hover {
+            background-color: #218838;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin-bottom: 15px;
+        }
+
+        .product-card {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            padding: 15px;
+            margin-bottom: 15px;
+            border: 1px solid #eee;
+        }
+
+        .product-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .product-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .product-price {
+            font-size: 16px;
+            color: #28a745;
+            font-weight: bold;
+        }
+
+        .product-details {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        .product-label {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .product-value {
+            font-size: 14px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .product-actions {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 10px;
+        }
+
+        .action-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 18px;
+            margin-left: 10px;
+            color: #dc3545;
+        }
+
+        .action-btn.edit {
+            color: #007bff;
+        }
+
+        .total-amount {
+            color: #dc3545;
+            font-size: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="left-panel" id="kassa-items">
+        <!-- Mahsulotlar shu yerda ko'rsatiladi -->
+    </div>
+    <div class="right-panel">
+        <h1>Buyurtma</h1>
+        <div id="order-items">
+            <!-- Buyurtma elementlari shu yerda ko'rsatiladi -->
+        </div>
+        <div class="checkout-total">
+            Jami: <span id="total-amount" class="total-amount">0</span> so'm
+        </div>
+        <input type="text" class="form-control" id="table-number" placeholder="Stol raqami">
+        <div>
+            <input type="checkbox" id="print-check" checked>
+            <label for="print-check">Chek chiqarish</label>
+        </div>
+        <div>
+            <input type="checkbox" id="clear-order">
+            <label for="clear-order">Tozalash</label>
+        </div>
+        <button class="btn" id="place-order">Buyurtma qilish</button>
+    </div>
+
+    <script>
+        let orders = [];
+        let total = 0;
+
+        // Mahsulotlarni qabul qilish
+        window.addEventListener('message', function (event) {
+            if (event.data.type === 'addToKassa') {
+                addProductToKassa(event.data.product);
+            }
+        });
+
+        // Mahsulotni kassaga qo'shish
+        function addProductToKassa(product) {
+            // Agar bu mahsulot allaqachon mavjud bo'lsa, miqdorini oshiramiz
+            const existingProduct = orders.find(p => p.id === product.id);
+
+            if (existingProduct) {
+                existingProduct.quantity += product.quantity;
+                existingProduct.total = existingProduct.quantity * existingProduct.price;
+            } else {
+                orders.push({
+                    ...product,
+                    originalIndex: orders.length
+                });
+            }
+
+            calculateTotal();
+            updateOrderDisplay();
+        }
+
+        // Umumiy summani hisoblash
+        function calculateTotal() {
+            total = orders.reduce((sum, product) => sum + product.total, 0);
+        }
+
+        // Buyurtmalarni ko'rsatish
+        function updateOrderDisplay() {
+            const orderItems = document.getElementById('order-items');
+            const kassaItems = document.getElementById('kassa-items');
+            const totalAmount = document.getElementById('total-amount');
+
+            orderItems.innerHTML = '';
+            kassaItems.innerHTML = '';
+
+            orders.forEach((item, index) => {
+                // Buyurtma paneli
+                const orderElement = document.createElement('div');
+                orderElement.className = 'checkout-item';
+                orderElement.innerHTML = `
+                    <span>${item.name} x ${item.quantity}</span>
+                    <span>${item.total.toLocaleString()} so'm</span>
+                `;
+                orderItems.appendChild(orderElement);
+
+                // Kassa paneli (chap tomonda) - to'liq ko'rinish
+                const kassaElement = document.createElement('div');
+                kassaElement.className = 'product-card';
+                kassaElement.innerHTML = `
+                    <div class="product-header">
+                        <div class="product-title">${item.name}</div>
+                        <div class="product-price">${item.price.toLocaleString()} so'm</div>
+                    </div>
+                    <div class="product-details">
+                        <div>
+                            <div class="product-label">Miqdor</div>
+                            <div class="product-value">${item.quantity} ${item.unit}</div>
+                        </div>
+                        <div>
+                            <div class="product-label">Jami</div>
+                            <div class="product-value">${item.total.toLocaleString()} so'm</div>
+                        </div>
+                    </div>
+                    <div class="product-actions">
+                        <button onclick="editItem(${index})" class="action-btn edit">✏️</button>
+                        <button onclick="removeItem(${index})" class="action-btn">🗑️</button>
+                    </div>
+                `;
+                kassaItems.appendChild(kassaElement);
+            });
+
+            totalAmount.textContent = total.toLocaleString();
+        }
+
+        // Mahsulotni tahrirlash
+        function editItem(index) {
+            const product = orders[index];
+            const newQuantity = prompt(`Yangi miqdorni kiriting (${product.unit}):`, product.quantity);
+
+            if (newQuantity && !isNaN(newQuantity)) {
+                product.quantity = parseFloat(newQuantity);
+                product.total = product.quantity * product.price;
+                calculateTotal();
+                updateOrderDisplay();
+            }
+        }
+
+        // Mahsulotni o'chirish
+        function removeItem(index) {
+            if (confirm("Rostan ham bu mahsulotni o'chirmoqchimisiz?")) {
+                orders.splice(index, 1);
+                calculateTotal();
+                updateOrderDisplay();
+            }
+        }
+
+        // Buyurtma qilish
+        document.getElementById('place-order').addEventListener('click', function () {
+            const tableNumber = document.getElementById('table-number').value;
+            const printCheck = document.getElementById('print-check').checked;
+            const clearOrder = document.getElementById('clear-order').checked;
+
+            if (orders.length === 0) {
+                alert("Iltimos, buyurtmaga mahsulot qo'shing!");
+                return;
+            }
+
+            if (!tableNumber) {
+                alert("Iltimos, stol raqamini kiriting!");
+                return;
+            }
+
+            // Bu yerda serverga yuborish yoki chek chiqarish logikasi bo'lishi kerak
+            console.log("Buyurtma qabul qilindi:");
+            console.log("Stol raqami:", tableNumber);
+            console.log("Buyurtmalar:", orders);
+            console.log("Jami summa:", total);
+
+            if (printCheck) {
+                alert("Chek chiqarildi!");
+            }
+
+            if (clearOrder) {
+                orders = [];
+                total = 0;
+                document.getElementById('table-number').value = "";
+                updateOrderDisplay();
+            }
+        });
+    </script>
+</body>
+
+</html>
